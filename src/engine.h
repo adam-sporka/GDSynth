@@ -3,78 +3,22 @@
 #include <assert.h>
 #include <map>
 
+#include "operators.h"
+
 using PARAM_NAME = int;
 using PARAM_VALUE = float;
-
-////////////////////////////////////////////////////////////////
-class COperator
-{
-public:
-};
-
-////////////////////////////////////////////////////////////////
-class COpSquareWave : public COperator
-{
-public:
-    int period = 0;
-    int duty_cycle = 0;
-    int counter = 0;
-
-    void setup(int period_, int duty_cycle_)
-    {
-        period = period_;
-        duty_cycle = duty_cycle_;
-    }
-
-    inline float getNextSample()
-    {
-        float out;
-        if (counter < duty_cycle)
-        {
-            out = .1f;
-        }
-        else
-        {
-            out = -.1f;
-        }
-        counter++;
-        if (counter == period) counter = 0;
-        return out;
-    }
-};
-
-////////////////////////////////////////////////////////////////
-class COpSineWave : public COperator
-{
-public:
-    float phase;
-    float frequency;
-
-    inline float getNextSample()
-    {
-        float out;
-        float delta = 2.0f * 3.1415926535f * frequency / 48000.0f;
-        phase += delta;
-        if (phase > 2.0f * 3.1415926535f)
-        {
-            phase -= 2.0f * 3.1415926535f;
-        }
-        return sin(phase) * .1f;
-    }
-};
-
-////////////////////////////////////////////////////////////////
 int g_InstanceCounter = 0;
 
+////////////////////////////////////////////////////////////////
 class CEvent
 {
 public:
     enum EVENT_STATE
     {
-        NOT_PLAYING, // Initial state
-        UPCOMING, // Created but not put in a slot yet
+        NOT_PLAYING, // Just created
         PLAYING, // Producing sound
         BEING_STOLEN, // Should be removed from its slot and killed
+        BEING_STOPPED, // Should stop
         RELEASED, // Reported not being processed anymore
     } m_State = NOT_PLAYING;
     std::map<PARAM_NAME, PARAM_VALUE> m_Rtpc;
@@ -88,9 +32,13 @@ public:
     {
         if (m_State == BEING_STOLEN)
         {
-            printf("Stolen and released %d\n", m_InstanceCounter);
             m_State = RELEASED;
         }
+    }
+
+    void stop()
+    {
+        m_State = BEING_STOPPED;
     }
 
     void setRTPC(PARAM_NAME name, PARAM_VALUE value)
@@ -123,7 +71,7 @@ class CEventExplosion : public CEvent
 public:
     CEventExplosion()
     {
-        sqr.setup(30, 15);
+        sqr.setup(30, 15, .1f);
     }
 
     // Interleaved LlRrLlRr ...
@@ -150,6 +98,11 @@ public:
         {
             m_State = EVENT_STATE::RELEASED;
         }
+
+        if (m_State == EVENT_STATE::BEING_STOPPED)
+        {
+            m_State = EVENT_STATE::RELEASED;
+        }
     }
 };
 
@@ -158,15 +111,19 @@ class CEventEngine : public CEvent
 {
     COpSineWave w1, w2, w3;
 
+public:
+    CEventEngine()
+    {
+        w1.frequency = 251.f + rand() % 30;
+        w2.frequency = 320.f + rand() % 30;
+        w3.frequency = 415.f + rand() % 30;
+    }
+
     // Interleaved LlRrLlRr ...
     virtual void fillStereoBuffer(int16_t* output, int num_frames, int num_channels)
     {
         assert(num_channels == 2);
         assert(num_frames > 0);
-
-        w1.frequency = 251.f + rand() % 30;
-        w2.frequency = 320.f + rand() % 30;
-        w3.frequency = 415.f + rand() % 30;
 
         int num_samples = num_frames * num_channels;
         auto* wrt = output;
@@ -180,6 +137,18 @@ class CEventEngine : public CEvent
         }
 
         CEvent::fillStereoBuffer(output, num_frames, num_channels);
+
+        if (m_State == EVENT_STATE::BEING_STOPPED)
+        {
+            w1.frequency *= 0.99f;
+            w2.frequency *= 0.99f;
+            w3.frequency *= 0.99f;
+
+            if (w1.frequency < 20.0f)
+            {
+                m_State = EVENT_STATE::RELEASED;
+            }
+        }
     }
 };
 
@@ -204,7 +173,9 @@ public:
         {
             if (!events[a]) continue;
 
-            if (events[a]->m_State == CEvent::EVENT_STATE::PLAYING || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOLEN)
+            if (events[a]->m_State == CEvent::EVENT_STATE::PLAYING 
+                || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOLEN
+                || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOPPED)
             {
                 events[a]->fillStereoBuffer(intermediate_buffer, num_frames, num_channels);
                 for (int i = 0; i < num_samples; i++)
@@ -270,8 +241,11 @@ public:
             }
         }
 
+        // Mark the event being stolen and remember the new event that is replacing it
         events[candidate_slot]->m_State = CEvent::EVENT_STATE::BEING_STOLEN;
         events[candidate_slot]->m_StolenBy = new_event;
+
+        return new_event;
     }
 
 private:

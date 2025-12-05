@@ -77,6 +77,7 @@ int main(int argc, char** argv[])
 {
     openAudio();
     char key;
+    CEvent* engine_event = nullptr;
     do
     {
         key = _getch();
@@ -86,7 +87,14 @@ int main(int argc, char** argv[])
         }
         if (key == 'e')
         {
-            engine.createEvent(new CEventEngine());
+            engine_event = engine.createEvent(new CEventEngine());
+        }
+        if (key == 'k')
+        {
+            if (engine_event)
+            {
+                engine_event->stop();
+            }
         }
     }
     while (key != 27);
