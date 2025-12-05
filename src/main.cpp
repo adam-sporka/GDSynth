@@ -83,11 +83,11 @@ int main(int argc, char** argv[])
         key = _getch();
         if (key == 'a')
         {
-            engine.createEvent(new CEventExplosion());
+            engine.createEvent(new CEventDrop());
         }
         if (key == 'e')
         {
-            engine_event = engine.createEvent(new CEventEngine());
+            engine_event = engine.createEvent(new CEventCarEngine());
         }
         if (key == 'k')
         {
