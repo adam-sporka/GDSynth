@@ -130,7 +130,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\engine.h" />
+    <ClInclude Include="src\event.h" />
+    <ClInclude Include="src\event_car_engine.h" />
+    <ClInclude Include="src\event_drop.h" />
     <ClInclude Include="src\operators.h" />
+    <ClInclude Include="src\types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />

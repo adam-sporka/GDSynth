@@ -3,42 +3,46 @@
 #include <assert.h>
 #include <map>
 
+#include "types.h"
+#include "envelope.h"
 #include "operators.h"
 #include "event.h"
 #include "event_drop.h"
 #include "event_car_engine.h"
 
 ////////////////////////////////////////////////////////////////
-#define NUM_EVENT_SLOTS 8
 class CEngine
 {
 private:
-    int16_t intermediate_buffer[1024 * 1024];
+    TFloatBuffer intermediate;
+    TFloatBuffer accumulator;
 
 public:
     // Interleaved LlRrLlRr ...
-    void fillStereoBuffer(int16_t* output, int num_frames, int num_channels)
+    void fillStereoBuffer(TIntBuffer output)
     {
-        assert(num_channels == 2);
-        assert(num_frames > 0);
-
-        int num_samples = num_frames * num_channels;
-        memset(output, 0, num_samples * sizeof(int16_t));
-
+        memset(accumulator, 0, sizeof(TFloatBuffer));
         for (int a = 0; a < NUM_EVENT_SLOTS; a++)
         {
             if (!events[a]) continue;
 
             if (events[a]->m_State == CEvent::EVENT_STATE::PLAYING 
-                || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOLEN
-                || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOPPED)
+             || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOLEN
+             || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOPPED)
             {
-                events[a]->fillStereoBuffer(intermediate_buffer, num_frames, num_channels);
-                for (int i = 0; i < num_samples; i++)
+                events[a]->fillFloatBuffer(intermediate);
+                for (int i = 0; i < BUFLEN; i++)
                 {
-                    output[i] += intermediate_buffer[i];
+                    accumulator[i][0] += intermediate[i][0];
+                    accumulator[i][1] += intermediate[i][1];
                 }
             }
+        }
+
+        for (int a = 0; a < BUFLEN; a++)
+        {
+            output[a][0] = accumulator[a][0] * 32767;
+            output[a][1] = accumulator[a][1] * 32767;
         }
 
         deleteReleasedEvents();
@@ -47,6 +51,21 @@ public:
     CEngine()
     {
         memset(events, 0, sizeof(CEvent*) * NUM_EVENT_SLOTS);
+    }
+
+    void stopSlot(int slotIndex)
+    {
+        if (slotIndex >= NUM_EVENT_SLOTS)
+        {
+            return;
+        }
+
+        if (events[slotIndex] == nullptr)
+        {
+            return;
+        }
+
+        events[slotIndex]->stop();
     }
 
     void deleteReleasedEvents()

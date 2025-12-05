@@ -5,14 +5,10 @@
 #include "windows.h"
 #include "engine.h"
 
-#define SAMPLE_RATE 48000
-#define NUM_CHANNELS 2
-#define BUFLEN 512
-
 int dummy_buffers = 0;
 HWAVEOUT hWaveOut;
-WAVEHDR whdr[8];
-unsigned char* wh_data[8];
+WAVEHDR whdr[4];
+TIntBuffer wh_data[4];
 int round_robin = 0;
 
 CEngine engine;
@@ -27,7 +23,7 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_P
     case WOM_CLOSE:
         break;
     case WOM_DONE:
-        engine.fillStereoBuffer((int16_t*)wh_data[round_robin % 4], BUFLEN, NUM_CHANNELS);
+        engine.fillStereoBuffer(wh_data[round_robin % 4]);
         waveOutWrite(hWaveOut, &whdr[round_robin], sizeof(whdr[round_robin]));
         round_robin = (round_robin + 1) & 0x3;
         break;
@@ -50,8 +46,7 @@ void openAudio()
     waveformatex.cbSize = 0;
     for (int i = 0; i < 4; i++)
     {
-        wh_data[i] = new unsigned char[BUFLEN * NUM_CHANNELS * 2];
-        memset(wh_data[i], 0, BUFLEN * NUM_CHANNELS * 2);
+        memset(wh_data[i], 0, sizeof(TIntBuffer));
         whdr[i].lpData = (char*)wh_data[i];
         whdr[i].dwBufferLength = BUFLEN * NUM_CHANNELS * 2;
         whdr[i].dwBytesRecorded = 0;
@@ -66,7 +61,7 @@ void openAudio()
     // Pre-buffer
     for (int i = 0; i < 4; i++)
     {
-        memset((int16_t*)wh_data[i], 0, sizeof(int16_t) * BUFLEN);
+        memset((TSample*)wh_data[i], 0, sizeof(TSample) * BUFLEN);
         waveOutPrepareHeader(hWaveOut, &whdr[i], sizeof(whdr[i]));
         waveOutWrite(hWaveOut, &whdr[i], sizeof(whdr[i]));
     }
@@ -89,12 +84,9 @@ int main(int argc, char** argv[])
         {
             engine_event = engine.createEvent(new CEventCarEngine());
         }
-        if (key == 'k')
+        if (key >= '0' && key <= '9')
         {
-            if (engine_event)
-            {
-                engine_event->stop();
-            }
+            engine.stopSlot(key - '0');
         }
     }
     while (key != 27);

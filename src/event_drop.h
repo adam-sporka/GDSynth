@@ -11,25 +11,19 @@ public:
     }
 
     // Interleaved LlRrLlRr ...
-    virtual void fillStereoBuffer(int16_t* output, int num_frames, int num_channels)
+    virtual void fillFloatBuffer(TFloatBuffer output)
     {
-        assert(num_channels == 2);
-        assert(num_frames > 0);
-
         sqr.period += 2;
         sqr.duty_cycle += 1;
-        int num_samples = num_frames * num_channels;
         auto* wrt = output;
-        for (int a = 0; a < num_samples; a += 2)
+        for (int a = 0; a < BUFLEN; a += 2)
         {
             float f = sqr.getNextSample();
-            *wrt = f * 32767;
-            wrt++;
-            *wrt = f * 32767;
-            wrt++;
+            output[a][0] = f;
+            output[a][1] = f;
         }
 
-        CEvent::fillStereoBuffer(output, num_frames, num_channels);
+        CEvent::fillFloatBuffer(output);
         if (sqr.period >= 200)
         {
             m_State = EVENT_STATE::RELEASED;
