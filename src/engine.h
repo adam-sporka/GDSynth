@@ -7,13 +7,13 @@ using PARAM_NAME = int;
 using PARAM_VALUE = float;
 
 ////////////////////////////////////////////////////////////////
-class CGen
+class COperator
 {
 public:
 };
 
 ////////////////////////////////////////////////////////////////
-class CGenSquareWave : public CGen
+class COpSquareWave : public COperator
 {
 public:
     int period = 0;
@@ -44,14 +44,28 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////
-class CGenSineWave : public CGen
+class COpSineWave : public COperator
 {
 public:
     float phase;
     float frequency;
+
+    inline float getNextSample()
+    {
+        float out;
+        float delta = 2.0f * 3.1415926535f * frequency / 48000.0f;
+        phase += delta;
+        if (phase > 2.0f * 3.1415926535f)
+        {
+            phase -= 2.0f * 3.1415926535f;
+        }
+        return sin(phase) * .1f;
+    }
 };
 
 ////////////////////////////////////////////////////////////////
+int g_InstanceCounter = 0;
+
 class CEvent
 {
 public:
@@ -66,6 +80,7 @@ public:
     std::map<PARAM_NAME, PARAM_VALUE> m_Rtpc;
     int64_t m_Served = 0;
     CEvent* m_StolenBy = nullptr;
+    int m_InstanceCounter = g_InstanceCounter++;
 
     EVENT_STATE getState() { return m_State; }
 
@@ -73,31 +88,38 @@ public:
     {
         if (m_State == BEING_STOLEN)
         {
+            printf("Stolen and released %d\n", m_InstanceCounter);
             m_State = RELEASED;
         }
+    }
+
+    void setRTPC(PARAM_NAME name, PARAM_VALUE value)
+    {
+        m_Rtpc[name] = value;
+    }
+
+    PARAM_VALUE getRTPC(PARAM_NAME name, PARAM_VALUE deflt)
+    {
+        if (m_Rtpc.find(name) == m_Rtpc.end())
+        {
+            m_Rtpc[name] = deflt;
+            return deflt;
+        }
+        return m_Rtpc[name];
     }
 
     // Interleaved LlRrLlRr ...
     virtual void fillStereoBuffer(int16_t* output, int num_frames, int num_channels)
     {
-        assert(num_channels == 2);
-        assert(num_frames > 0);
-
-        int num_samples = num_frames * num_channels;
-        auto* wrt = output;
-        for (int a = 0; a < num_samples; a++)
-        {
-            *wrt = rand() % 16384 - 8192;
-            wrt++;
-        }
-
+        m_Served += num_frames;
         handleStealing();
     }
 };
 
+////////////////////////////////////////////////////////////////
 class CEventExplosion : public CEvent
 {
-    CGenSquareWave sqr;
+    COpSquareWave sqr;
 public:
     CEventExplosion()
     {
@@ -123,21 +145,46 @@ public:
             wrt++;
         }
 
-        if (sqr.period == 200)
+        CEvent::fillStereoBuffer(output, num_frames, num_channels);
+        if (sqr.period >= 200)
         {
             m_State = EVENT_STATE::RELEASED;
         }
-
-        handleStealing();
     }
 };
 
+////////////////////////////////////////////////////////////////
 class CEventEngine : public CEvent
 {
+    COpSineWave w1, w2, w3;
+
+    // Interleaved LlRrLlRr ...
+    virtual void fillStereoBuffer(int16_t* output, int num_frames, int num_channels)
+    {
+        assert(num_channels == 2);
+        assert(num_frames > 0);
+
+        w1.frequency = 251.f + rand() % 30;
+        w2.frequency = 320.f + rand() % 30;
+        w3.frequency = 415.f + rand() % 30;
+
+        int num_samples = num_frames * num_channels;
+        auto* wrt = output;
+        for (int a = 0; a < num_samples; a += 2)
+        {
+            float f = w1.getNextSample() + w2.getNextSample() + w3.getNextSample();
+            *wrt = f * 32767;
+            wrt++;
+            *wrt = f * 32767;
+            wrt++;
+        }
+
+        CEvent::fillStereoBuffer(output, num_frames, num_channels);
+    }
 };
 
 ////////////////////////////////////////////////////////////////
-#define NUM_EVENT_SLOTS 128
+#define NUM_EVENT_SLOTS 8
 class CEngine
 {
 private:
@@ -166,6 +213,8 @@ public:
                 }
             }
         }
+
+        deleteReleasedEvents();
     }
 
     CEngine()
@@ -190,6 +239,7 @@ public:
                 if (stolen_by)
                 {
                     events[a] = stolen_by;
+                    events[a]->m_State = CEvent::EVENT_STATE::PLAYING;
                 }
             }
         }

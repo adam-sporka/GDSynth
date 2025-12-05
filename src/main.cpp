@@ -36,6 +36,7 @@ void CALLBACK waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_P
     }
 }
 
+////////////////////////////////////////////////////////////////
 void openAudio()
 {
     // Create the output buffers
@@ -72,7 +73,6 @@ void openAudio()
 }
 
 ////////////////////////////////////////////////////////////////
-
 int main(int argc, char** argv[])
 {
     openAudio();
@@ -83,6 +83,10 @@ int main(int argc, char** argv[])
         if (key == 'a')
         {
             engine.createEvent(new CEventExplosion());
+        }
+        if (key == 'e')
+        {
+            engine.createEvent(new CEventEngine());
         }
     }
     while (key != 27);
