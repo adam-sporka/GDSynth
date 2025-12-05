@@ -6,7 +6,7 @@ class COperator
 public:
     float volume = 1.0f;
     float target_volume = 1.0f;
-    float rate = 1.0f / (float)SAMPLE_RATE;
+    float volume_delta = 1.0f / (float)SAMPLE_RATE;
 
 public:
     inline void updateVolume()
@@ -17,12 +17,12 @@ public:
         }
         else if (target_volume > volume)
         {
-            volume += rate;
+            volume += volume_delta;
             if (volume > target_volume) volume = target_volume;
         }
         else
         {
-            volume -= rate;
+            volume -= volume_delta;
             if (volume < target_volume) volume = target_volume;
         }
     }
@@ -33,9 +33,10 @@ public:
         volume = target_volume_;
     }
 
-    void setTargetVolume(float target_volume_)
+    void setTargetVolume(float target_volume_, float rate_)
     {
         target_volume = target_volume_;
+        volume_delta = rate_ / (float)SAMPLE_RATE;
     }
 };
 
@@ -51,7 +52,14 @@ public:
     {
         period = period_;
         duty_cycle = duty_cycle_;
-        setTargetVolume(volume_);
+        setVolume(volume_);
+    }
+    
+    void setMidiNote(int note)
+    {
+        float f = 440 * pow(2, (note - 69)/12.0f);
+        period = SAMPLE_RATE / f;
+        duty_cycle = period / 2;
     }
 
     inline float getNextSample()
@@ -67,7 +75,7 @@ public:
             out = -volume;
         }
         counter++;
-        if (counter == period) counter = 0;
+        if (counter >= period) counter = 0;
         return out;
     }
 };

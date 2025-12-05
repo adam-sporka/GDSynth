@@ -84,6 +84,14 @@ int main(int argc, char** argv[])
         {
             engine_event = engine.createEvent(new CEventCarEngine());
         }
+        if (key == 'c')
+        {
+            engine_event = engine.createEvent(new CEventCoin());
+        }
+        if (key == 'j')
+        {
+            engine_event = engine.createEvent(new CEventJingle());
+        }
         if (key >= '0' && key <= '9')
         {
             engine.stopSlot(key - '0');

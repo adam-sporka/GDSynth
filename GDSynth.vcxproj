@@ -132,7 +132,9 @@
     <ClInclude Include="src\engine.h" />
     <ClInclude Include="src\event.h" />
     <ClInclude Include="src\event_car_engine.h" />
+    <ClInclude Include="src\event_coin.h" />
     <ClInclude Include="src\event_drop.h" />
+    <ClInclude Include="src\event_jingle.h" />
     <ClInclude Include="src\operators.h" />
     <ClInclude Include="src\types.h" />
   </ItemGroup>

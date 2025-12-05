@@ -30,11 +30,11 @@ public:
 
         if (m_State == EVENT_STATE::BEING_STOPPED)
         {
-            w1.setTargetVolume(0.0f);
+            w1.setTargetVolume(0.0f, 0.5f);
             w1.frequency *= 0.99f;
-            w2.setTargetVolume(0.0f);
+            w2.setTargetVolume(0.0f, 0.5f);
             w2.frequency *= 0.99f;
-            w3.setTargetVolume(0.0f);
+            w3.setTargetVolume(0.0f, 0.5f);
             w3.frequency *= 0.99f;
 
             if (w1.frequency < 20.0f)

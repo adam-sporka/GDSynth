@@ -8,7 +8,9 @@
 #include "operators.h"
 #include "event.h"
 #include "event_drop.h"
+#include "event_coin.h"
 #include "event_car_engine.h"
+#include "event_jingle.h"
 
 ////////////////////////////////////////////////////////////////
 class CEngine
