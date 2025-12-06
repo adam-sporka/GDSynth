@@ -2,6 +2,7 @@
 
 A micro framework for procedural audio, developed for a talk at GDS 2025 Prague.
 
+```
 // GDSynth
 // Copyright 2025 Adam Sporka
 //
@@ -24,3 +25,4 @@ A micro framework for procedural audio, developed for a talk at GDS 2025 Prague.
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
+```
