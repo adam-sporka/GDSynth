@@ -17,7 +17,6 @@ public:
     {
         sqr.period += 2;
         sqr.duty_cycle += 1;
-        auto* wrt = output;
         for (int a = 0; a < BUFLEN; a += 2)
         {
             float f = sqr.getNextSample();

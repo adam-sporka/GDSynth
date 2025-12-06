@@ -78,10 +78,7 @@ int main(int argc, char** argv[])
     do
     {
         key = _getch();
-        if (key == 'a')
-        {
-            engine.createEvent(new CEventDrop());
-        }
+
         if (key == 'd')
         {
             printf("Duty cycle: 30/60\n");
@@ -94,18 +91,36 @@ int main(int argc, char** argv[])
             printf("Duty cycle: %d/60\n", duty_cycle);
             duty_cycle_demo->setRTPC(CEventDutyCycle::DUTY_CYCLE, duty_cycle);
         }
-        if (key == 'e')
-        {
-            engine_event = new CEventElectrictCar();
-            engine.createEvent(engine_event);
-        }
+
         if (key == 'c')
         {
             engine.createEvent(new CEventCoinPickup());
         }
+
+        if (key == 'a')
+        {
+            engine.createEvent(new CEventDrop());
+        }
+
+        if (key == 'r')
+        {
+            engine.createEvent(new CEventRandomSponge());
+        }
+
+        if (key == 'j')
+        {
+            engine.createEvent(new CEventJingle());
+        }
+
         if (key == 't')
         {
             engine.createEvent(new CEventTweet());
+        }
+
+        if (key == 'e')
+        {
+            engine_event = new CEventElectrictCar();
+            engine.createEvent(engine_event);
         }
         if (key == 'v')
         {
@@ -123,14 +138,7 @@ int main(int argc, char** argv[])
                 engine_event->setRTPC(CEventElectrictCar::VELOCITY, velocity);
             }
         }
-        if (key == 'j')
-        {
-            engine.createEvent(new CEventJingle());
-        }
-        if (key == 'r')
-        {
-            engine.createEvent(new CEventRandomSponge());
-        }
+
         if (key >= '0' && key <= '9')
         {
             engine.stopSlot(key - '0');

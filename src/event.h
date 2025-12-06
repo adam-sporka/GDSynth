@@ -25,6 +25,8 @@ public:
 
     EVENT_STATE getState() { return m_State; }
 
+    virtual const char* getName() { return "CEvent"; };
+
     void handleStealing()
     {
         if (m_State == BEING_STOLEN)
@@ -43,8 +45,6 @@ public:
         m_Rtpc[name] = value;
     }
 
-    virtual const char* getName() { return "CEvent"; };
-
     TParamValue getRTPC(TParamName name, TParamValue deflt)
     {
         if (m_Rtpc.find(name) == m_Rtpc.end())
@@ -55,7 +55,6 @@ public:
         return m_Rtpc[name];
     }
 
-    // Interleaved LlRrLlRr ...
     virtual void fillFloatBuffer(TFloatBuffer output)
     {
         m_Served += BUFLEN;

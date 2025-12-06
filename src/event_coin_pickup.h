@@ -4,6 +4,8 @@
 class CEventCoinPickup : public CEvent
 {
     COpSquareWave sqr;
+    int length_counter = 0;
+
 public:
     CEventCoinPickup()
     {
@@ -15,8 +17,6 @@ public:
     // Interleaved LlRrLlRr ...
     virtual void fillFloatBuffer(TFloatBuffer output)
     {
-        sqr.setTargetVolume(0.f, 4.0f);
-
         for (int a = 0; a < BUFLEN; a += 2)
         {
             float f = sqr.getNextSample();
@@ -24,7 +24,8 @@ public:
             output[a][1] = f;
         }
 
-        if (sqr.volume < EPSILON)
+        length_counter++;
+        if (length_counter > 3)
         {
             m_State = EVENT_STATE::RELEASED;
         }
