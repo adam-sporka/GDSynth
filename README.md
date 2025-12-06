@@ -1,6 +1,6 @@
 # GDSynth
 
-A micro framework for procedural audio, developed for a talk at GDS 2025 Prague.
+A micro framework for procedural audio, developed for my talk at GDS 2025 Prague.
 
 ```
 // GDSynth
