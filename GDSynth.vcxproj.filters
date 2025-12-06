@@ -18,7 +18,7 @@
     <ClInclude Include="src\engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\operators.h">
+    <ClInclude Include="src\operator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\event.h">
@@ -46,6 +46,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\event_tweet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\operator_sine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\operator_square.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

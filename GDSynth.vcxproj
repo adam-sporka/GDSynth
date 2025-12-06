@@ -138,7 +138,9 @@
     <ClInclude Include="src\event_jingle.h" />
     <ClInclude Include="src\event_random_sponge.h" />
     <ClInclude Include="src\event_tweet.h" />
-    <ClInclude Include="src\operators.h" />
+    <ClInclude Include="src\operator.h" />
+    <ClInclude Include="src\operator_sine.h" />
+    <ClInclude Include="src\operator_square.h" />
     <ClInclude Include="src\types.h" />
   </ItemGroup>
   <ItemGroup>
