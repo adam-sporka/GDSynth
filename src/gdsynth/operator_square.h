@@ -17,8 +17,8 @@ public:
 
     void setMidiNote(int note)
     {
-        float f = 440 * pow(2, (note - 69) / 12.0f);
-        period = SAMPLE_RATE / f;
+        float f = 440 * powf(2, (note - 69) / 12.0f);
+        period = (int)(SAMPLE_RATE / f);
         duty_cycle = period / 2;
     }
 

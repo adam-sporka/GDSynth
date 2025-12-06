@@ -129,22 +129,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine.h" />
-    <ClInclude Include="src\event.h" />
-    <ClInclude Include="src\event_electric_car.h" />
-    <ClInclude Include="src\event_coin_pickup.h" />
-    <ClInclude Include="src\event_drop.h" />
-    <ClInclude Include="src\event_duty_cycle.h" />
-    <ClInclude Include="src\event_jingle.h" />
-    <ClInclude Include="src\event_random_sponge.h" />
-    <ClInclude Include="src\event_tweet.h" />
-    <ClInclude Include="src\operator.h" />
-    <ClInclude Include="src\operator_sine.h" />
-    <ClInclude Include="src\operator_square.h" />
-    <ClInclude Include="src\types.h" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
+    <ClInclude Include="src\gdsynth\event.h" />
+    <ClInclude Include="src\gdsynth\event_coin_pickup.h" />
+    <ClInclude Include="src\gdsynth\event_drop.h" />
+    <ClInclude Include="src\gdsynth\event_duty_cycle.h" />
+    <ClInclude Include="src\gdsynth\event_electric_car.h" />
+    <ClInclude Include="src\gdsynth\event_jingle.h" />
+    <ClInclude Include="src\gdsynth\event_random_sponge.h" />
+    <ClInclude Include="src\gdsynth\event_tweet.h" />
+    <ClInclude Include="src\gdsynth\gdsynth.h" />
+    <ClInclude Include="src\gdsynth\operator.h" />
+    <ClInclude Include="src\gdsynth\operator_noise.h" />
+    <ClInclude Include="src\gdsynth\operator_sine.h" />
+    <ClInclude Include="src\gdsynth\operator_square.h" />
+    <ClInclude Include="src\gdsynth\types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

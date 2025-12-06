@@ -26,6 +26,11 @@ public:
         }
     }
 
+    virtual inline float getNextSample()
+    {
+        return 0.0f;
+    }
+
     // Set immediate volume level
     void setVolume(float target_volume_)
     {

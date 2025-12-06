@@ -19,7 +19,7 @@ public:
     // Interleaved LlRrLlRr ...
     virtual void fillFloatBuffer(TFloatBuffer output)
     {
-        sqr.duty_cycle = getRTPC(DUTY_CYCLE, 30);
+        sqr.duty_cycle = (int)getRTPC(DUTY_CYCLE, 30.0f);
 
         for (int a = 0; a < BUFLEN; a += 2)
         {

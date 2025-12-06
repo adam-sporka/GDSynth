@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "windows.h"
-#include "engine.h"
+#include "gdsynth/gdsynth.h"
 
 int dummy_buffers = 0;
 HWAVEOUT hWaveOut;
@@ -11,7 +11,7 @@ WAVEHDR whdr[4];
 TIntBuffer wh_data[4];
 int round_robin = 0;
 
-CEngine engine;
+CGDSynth engine;
 
 ////////////////////////////////////////////////////////////////
 DWORD dw;
@@ -89,7 +89,7 @@ int main(int argc, char** argv[])
         {
             int duty_cycle = rand() % 60;
             printf("Duty cycle: %d/60\n", duty_cycle);
-            duty_cycle_demo->setRTPC(CEventDutyCycle::DUTY_CYCLE, duty_cycle);
+            duty_cycle_demo->setRTPC(CEventDutyCycle::DUTY_CYCLE, (float)duty_cycle);
         }
 
         if (key == 'c')

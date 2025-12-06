@@ -11,14 +11,13 @@ public:
     inline float getNextSample()
     {
         updateVolume();
-        float out;
         float delta = 2 * PI * (frequency + (frequency_bend * frequency)) / 48000.0f;
         phase += delta;
         if (phase > 2 * PI)
         {
             phase -= 2 * PI;
         }
-        return sin(phase) * volume;
+        return sinf(phase) * volume;
     }
 };
 

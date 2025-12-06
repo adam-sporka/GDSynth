@@ -1,0 +1,178 @@
+// GDSynth
+// Copyright 2025 Adam Sporka
+//
+// MIT License
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the “Software”), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+
+#pragma once
+
+#include <assert.h>
+#include <map>
+
+#include "types.h"
+
+#include "operator.h"
+#include "operator_square.h"
+#include "operator_sine.h"
+#include "operator_noise.h"
+
+#include "event.h"
+#include "event_drop.h"
+#include "event_coin_pickup.h"
+#include "event_electric_car.h"
+#include "event_jingle.h"
+#include "event_duty_cycle.h"
+#include "event_random_sponge.h"
+#include "event_tweet.h"
+
+////////////////////////////////////////////////////////////////
+class CGDSynth
+{
+private:
+    TFloatBuffer intermediate;
+    TFloatBuffer accumulator;
+
+    int prev_num_active = -1;
+
+public:
+    // Interleaved LlRrLlRr ...
+    void fillStereoBuffer(TIntBuffer output)
+    {
+        int num_active_now = 0;
+        memset(accumulator, 0, sizeof(TFloatBuffer));
+        for (int a = 0; a < NUM_EVENT_SLOTS; a++)
+        {
+            if (!events[a]) continue;
+            num_active_now++;
+
+            if (events[a]->m_State == CEvent::EVENT_STATE::PLAYING 
+             || events[a]->m_State == CEvent::EVENT_STATE::STOP_REQUESTED
+             || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOLEN
+             || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOPPED)
+            {
+                events[a]->fillFloatBuffer(intermediate);
+                for (int i = 0; i < BUFLEN; i++)
+                {
+                    accumulator[i][0] += intermediate[i][0];
+                    accumulator[i][1] += intermediate[i][1];
+                }
+            }
+        }
+
+        for (int a = 0; a < BUFLEN; a++)
+        {
+            output[a][0] = (int)(accumulator[a][0] * 32767);
+            output[a][1] = (int)(accumulator[a][1] * 32767);
+        }
+
+        deleteReleasedEvents();
+
+        if (num_active_now != prev_num_active)
+        {
+            printf("Active events: %d ", num_active_now);
+            for (int a = 0; a < NUM_EVENT_SLOTS; a++)
+            {
+                if (!events[a]) continue;
+                printf("%s ", events[a]->getName());
+            }
+            printf("\n");
+
+            prev_num_active = num_active_now;
+        }
+    }
+
+    CGDSynth()
+    {
+        memset(events, 0, sizeof(CEvent*) * NUM_EVENT_SLOTS);
+    }
+
+    void stopSlot(int slotIndex)
+    {
+        if (slotIndex >= NUM_EVENT_SLOTS)
+        {
+            return;
+        }
+
+        if (events[slotIndex] == nullptr)
+        {
+            return;
+        }
+
+        events[slotIndex]->stop();
+    }
+
+    void deleteReleasedEvents()
+    {
+        // It is safe to delete all RELEASED events;
+        for (int a = 0; a < NUM_EVENT_SLOTS; a++)
+        {
+            // This slot doesn't have anything in yet
+            if (!events[a]) continue;
+
+            // The audio thread has released this event --> can be deleted and forgotten
+            if (events[a]->getState() == CEvent::EVENT_STATE::RELEASED)
+            {
+                auto stolen_by = events[a]->m_StolenBy;
+                delete events[a];
+                events[a] = nullptr;
+                if (stolen_by)
+                {
+                    events[a] = stolen_by;
+                    events[a]->m_State = CEvent::EVENT_STATE::PLAYING;
+                }
+            }
+        }
+    }
+
+    CEvent* createEvent(CEvent* new_event)
+    {
+        // Find a slot for it
+        for (int a = 0; a < NUM_EVENT_SLOTS; a++)
+        {
+            if (!events[a])
+            {
+                events[a] = new_event;
+                new_event->m_State = CEvent::EVENT_STATE::PLAYING;
+                return new_event;
+            }
+        }
+
+        // None found? Steal the oldest.
+        int64_t max_served = 0;
+        int candidate_slot = 0;
+        for (int a = 0; a < NUM_EVENT_SLOTS; a++)
+        {
+            if (events[a]->m_Served >= max_served)
+            {
+                max_served = events[a]->m_Served;
+                candidate_slot = a;
+            }
+        }
+
+        // Mark the event being stolen and remember the new event that is replacing it
+        events[candidate_slot]->m_State = CEvent::EVENT_STATE::BEING_STOLEN;
+        events[candidate_slot]->m_StolenBy = new_event;
+
+        return new_event;
+    }
+
+private:
+    CEvent* events[NUM_EVENT_SLOTS];
+};

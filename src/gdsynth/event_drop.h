@@ -29,7 +29,7 @@ public:
             m_State = EVENT_STATE::RELEASED;
         }
 
-        if (m_State == EVENT_STATE::BEING_STOPPED)
+        if (m_State == EVENT_STATE::STOP_REQUESTED)
         {
             m_State = EVENT_STATE::RELEASED;
         }
