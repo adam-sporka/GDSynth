@@ -72,7 +72,9 @@ int main(int argc, char** argv[])
 {
     openAudio();
     char key;
-    CEventCarEngine* engine_event = nullptr;
+    CEventElectrictCar* engine_event = nullptr;
+    CEventDutyCycle* duty_cycle_demo = nullptr;
+    float velocity = 0.f;
     do
     {
         key = _getch();
@@ -80,18 +82,54 @@ int main(int argc, char** argv[])
         {
             engine.createEvent(new CEventDrop());
         }
+        if (key == 'd')
+        {
+            printf("Duty cycle: 30/60\n");
+            duty_cycle_demo = new CEventDutyCycle();
+            engine.createEvent(duty_cycle_demo);
+        }
+        if (key == 'D')
+        {
+            int duty_cycle = rand() % 60;
+            printf("Duty cycle: %d/60\n", duty_cycle);
+            duty_cycle_demo->setRTPC(CEventDutyCycle::DUTY_CYCLE, duty_cycle);
+        }
         if (key == 'e')
         {
-            engine_event = new CEventCarEngine();
+            engine_event = new CEventElectrictCar();
             engine.createEvent(engine_event);
         }
         if (key == 'c')
         {
-            engine.createEvent(new CEventCoin());
+            engine.createEvent(new CEventCoinPickup());
+        }
+        if (key == 't')
+        {
+            engine.createEvent(new CEventTweet());
+        }
+        if (key == 'v')
+        {
+            if (engine_event)
+            {
+                velocity += 10.f;
+                engine_event->setRTPC(CEventElectrictCar::VELOCITY, velocity);
+            }
+        }
+        if (key == 'V')
+        {
+            if (engine_event)
+            {
+                velocity -= 10.f;
+                engine_event->setRTPC(CEventElectrictCar::VELOCITY, velocity);
+            }
         }
         if (key == 'j')
         {
             engine.createEvent(new CEventJingle());
+        }
+        if (key == 'r')
+        {
+            engine.createEvent(new CEventRandomSponge());
         }
         if (key >= '0' && key <= '9')
         {

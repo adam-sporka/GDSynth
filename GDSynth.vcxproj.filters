@@ -24,7 +24,7 @@
     <ClInclude Include="src\event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\event_car_engine.h">
+    <ClInclude Include="src\event_electric_car.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\event_drop.h">
@@ -33,10 +33,19 @@
     <ClInclude Include="src\types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\event_coin.h">
+    <ClInclude Include="src\event_coin_pickup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\event_jingle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\event_duty_cycle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\event_random_sponge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\event_tweet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -16,16 +16,16 @@ public:
         sqr.setup(24, 12, .1f);
     }
 
+    virtual const char* getName() { return "JINGLE"; };
+
     // Interleaved LlRrLlRr ...
     virtual void fillFloatBuffer(TFloatBuffer output)
     {
         // Advance the melody
         if (tick_counter == 0)
         {
-            printf(".");
             if (melody[melody_pos] == -1)
             {
-                printf("!");
                 m_State = EVENT_STATE::RELEASED;
             }
             sqr.setMidiNote(melody[melody_pos]);

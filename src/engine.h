@@ -8,9 +8,12 @@
 #include "operators.h"
 #include "event.h"
 #include "event_drop.h"
-#include "event_coin.h"
-#include "event_car_engine.h"
+#include "event_coin_pickup.h"
+#include "event_electric_car.h"
 #include "event_jingle.h"
+#include "event_duty_cycle.h"
+#include "event_random_sponge.h"
+#include "event_tweet.h"
 
 ////////////////////////////////////////////////////////////////
 class CEngine
@@ -19,16 +22,21 @@ private:
     TFloatBuffer intermediate;
     TFloatBuffer accumulator;
 
+    int prev_num_active = -1;
+
 public:
     // Interleaved LlRrLlRr ...
     void fillStereoBuffer(TIntBuffer output)
     {
+        int num_active_now = 0;
         memset(accumulator, 0, sizeof(TFloatBuffer));
         for (int a = 0; a < NUM_EVENT_SLOTS; a++)
         {
             if (!events[a]) continue;
+            num_active_now++;
 
             if (events[a]->m_State == CEvent::EVENT_STATE::PLAYING 
+             || events[a]->m_State == CEvent::EVENT_STATE::STOP_REQUESTED
              || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOLEN
              || events[a]->m_State == CEvent::EVENT_STATE::BEING_STOPPED)
             {
@@ -48,6 +56,19 @@ public:
         }
 
         deleteReleasedEvents();
+
+        if (num_active_now != prev_num_active)
+        {
+            printf("Active events: %d ", num_active_now);
+            for (int a = 0; a < NUM_EVENT_SLOTS; a++)
+            {
+                if (!events[a]) continue;
+                printf("%s ", events[a]->getName());
+            }
+            printf("\n");
+
+            prev_num_active = num_active_now;
+        }
     }
 
     CEngine()

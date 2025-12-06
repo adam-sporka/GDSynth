@@ -1,36 +1,34 @@
 #pragma once
 
 ////////////////////////////////////////////////////////////////
-class CEventDrop : public CEvent
+class CEventDutyCycle : public CEvent
 {
     COpSquareWave sqr;
+
 public:
-    CEventDrop()
+    static constexpr TParamName DUTY_CYCLE = 0;
+    
+public:
+    CEventDutyCycle()
     {
-        sqr.setup(30, 15, .1f);
+        sqr.setup(60, 30, .1f);
     }
 
-    virtual const char* getName() { return "DROP"; };
+    virtual const char* getName() { return "DUTY_CYCLE_TEST"; };
 
     // Interleaved LlRrLlRr ...
     virtual void fillFloatBuffer(TFloatBuffer output)
     {
-        sqr.period += 2;
-        sqr.duty_cycle += 1;
-        auto* wrt = output;
+        sqr.duty_cycle = getRTPC(DUTY_CYCLE, 30);
+
         for (int a = 0; a < BUFLEN; a += 2)
         {
             float f = sqr.getNextSample();
             output[a][0] = f;
             output[a][1] = f;
         }
-
-        if (sqr.period >= 200)
-        {
-            m_State = EVENT_STATE::RELEASED;
-        }
-
-        if (m_State == EVENT_STATE::BEING_STOPPED)
+        
+        if (m_State == EVENT_STATE::STOP_REQUESTED)
         {
             m_State = EVENT_STATE::RELEASED;
         }
@@ -39,3 +37,4 @@ public:
     }
 };
 
+  

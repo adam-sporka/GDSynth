@@ -1,14 +1,16 @@
 #pragma once
 
 ////////////////////////////////////////////////////////////////
-class CEventCoin : public CEvent
+class CEventCoinPickup : public CEvent
 {
     COpSquareWave sqr;
 public:
-    CEventCoin()
+    CEventCoinPickup()
     {
         sqr.setup(24, 12, .1f);
     }
+
+    virtual const char* getName() { return "COIN_PICKUP"; };
 
     // Interleaved LlRrLlRr ...
     virtual void fillFloatBuffer(TFloatBuffer output)
@@ -22,12 +24,12 @@ public:
             output[a][1] = f;
         }
 
-        CEvent::fillFloatBuffer(output);
-
         if (sqr.volume < EPSILON)
         {
             m_State = EVENT_STATE::RELEASED;
         }
+
+        CEvent::fillFloatBuffer(output);
     }
 };
 

@@ -86,18 +86,19 @@ class COpSineWave : public COperator
 public:
     float phase;
     float frequency;
+    float frequency_bend = 0.0f;
 
     inline float getNextSample()
     {
         updateVolume();
         float out;
-        float delta = 2 * PI * frequency / 48000.0f;
+        float delta = 2 * PI * (frequency + (frequency_bend * frequency)) / 48000.0f;
         phase += delta;
         if (phase > 2 * PI)
         {
             phase -= 2 * PI;
         }
-        return sin(phase) * volume * 0.1f;
+        return sin(phase) * volume;
     }
 };
 

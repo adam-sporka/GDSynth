@@ -5,7 +5,7 @@
 #define NUM_EVENT_SLOTS 8
 #define SAMPLE_RATE 48000
 #define NUM_CHANNELS 2
-#define BUFLEN 512
+#define BUFLEN 480
 #define PI 3.1415926535f
 #define EPSILON 0.001
 

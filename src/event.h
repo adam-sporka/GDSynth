@@ -10,6 +10,7 @@ public:
     {
         NOT_PLAYING, // Just created
         PLAYING, // Producing sound
+        STOP_REQUESTED, // User wants to stop the sound
         BEING_STOLEN, // Should be removed from its slot and killed
         BEING_STOPPED, // Should stop
         RELEASED, // Reported not being processed anymore
@@ -34,13 +35,15 @@ public:
 
     void stop()
     {
-        m_State = BEING_STOPPED;
+        m_State = STOP_REQUESTED;
     }
 
     void setRTPC(TParamName name, TParamValue value)
     {
         m_Rtpc[name] = value;
     }
+
+    virtual const char* getName() { return "CEvent"; };
 
     TParamValue getRTPC(TParamName name, TParamValue deflt)
     {

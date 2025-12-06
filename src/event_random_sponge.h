@@ -1,23 +1,24 @@
 #pragma once
 
 ////////////////////////////////////////////////////////////////
-class CEventDrop : public CEvent
+class CEventRandomSponge: public CEvent
 {
     COpSquareWave sqr;
+    
 public:
-    CEventDrop()
+    CEventRandomSponge()
     {
-        sqr.setup(30, 15, .1f);
+        sqr.setup(24, 12, .1f);
     }
 
-    virtual const char* getName() { return "DROP"; };
+    virtual const char* getName() { return "RANDOM_SPONGE"; };
 
     // Interleaved LlRrLlRr ...
     virtual void fillFloatBuffer(TFloatBuffer output)
     {
-        sqr.period += 2;
-        sqr.duty_cycle += 1;
-        auto* wrt = output;
+        sqr.period = rand() % 32;
+        sqr.duty_cycle = sqr.period >> 1;
+        
         for (int a = 0; a < BUFLEN; a += 2)
         {
             float f = sqr.getNextSample();
@@ -25,12 +26,7 @@ public:
             output[a][1] = f;
         }
 
-        if (sqr.period >= 200)
-        {
-            m_State = EVENT_STATE::RELEASED;
-        }
-
-        if (m_State == EVENT_STATE::BEING_STOPPED)
+        if (m_State == EVENT_STATE::STOP_REQUESTED)
         {
             m_State = EVENT_STATE::RELEASED;
         }
@@ -39,3 +35,4 @@ public:
     }
 };
 
+  
