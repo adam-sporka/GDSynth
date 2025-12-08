@@ -2,6 +2,9 @@
 
 A micro framework for procedural audio, developed for my talk at GDS 2025 Prague.
 
+Slides:
+https://docs.google.com/presentation/d/13fIBSTILs6tugZs3bfDo93LEXTKgGH_3LsaZaJT6IyE
+
 ```
 // GDSynth
 // Copyright 2025 Adam Sporka
