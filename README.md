@@ -1,5 +1,7 @@
 # GDSynth
 
+<img width="340" height="200" alt="interim-logo" src="https://github.com/user-attachments/assets/664a1556-1c6a-4292-bd68-bf5d7e1984d6" />
+
 At the end of 2025 I presented a talk at GDS conference in Prague entitled “Essentials of Procedural Game Audio”.
 The talk introduced the concept of procedural audio from the perspective of low-level programming in C++
 by illustrating the fundamentals of digital synthesis and voice management on the architecture of a custom
